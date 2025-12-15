@@ -1,0 +1,20 @@
+/* minimal elastic adjustments */
+#rdp-inline-rounddav_provision.rdp-row{
+  margin:6px 0; padding:6px;
+  border:1px solid var(--border, #ddd); border-radius:6px;
+  display:flex; gap:.5rem; align-items:center; background:var(--body-bg,#fff);
+}
+#rdp-inline-rounddav_provision .rdp-label{ font-weight:600; }
+
+.listing.iconized li.rounddav_provision > a:before,
+.listing.iconized tr.rounddav_provision > td.section:before {
+  content: "\f084";
+}
+
+.rdp-config-path{ margin:0 0 .75rem; font-size:.95em; color:var(--color-hint,#555); }
+.rdp-help{ margin-top:.35rem; font-size:.85em; color:var(--color-hint,#555); }
+.rdp-warning{
+  margin-top:.5rem; padding:.5rem .75rem;
+  border:1px solid #f0ad4e; border-radius:4px;
+  background:#fff8e1; color:#8a6d3b; font-size:.9em;
+}

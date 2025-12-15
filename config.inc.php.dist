@@ -1,0 +1,68 @@
+<?php
+
+// RoundDAV provision plugin configuration
+
+// Base URL to RoundDAV API entrypoint (no route parameter).
+$config['rounddav_base_url']   = 'https://www.domain.com/rounddav/public';
+
+// For local Roundcube + RoundDAV on the same host, something like:
+//   http://127.0.0.1/rounddav/public/api.php
+$config['rounddav_api_url'] = 'https://www.domain.com/rounddav/public/api.php?r=provision/user';
+
+//$config['rounddav_api_host']  = 'lamestreamnews.com';
+
+// Shared secret token, must match 'shared_secret' in RoundDAV's config.php
+$config['rounddav_api_token'] = '';
+
+// Shared SSO token, must match 'shared_secret' in RoundDAV's config.php
+$config['rounddav_sso_secret'] = '';
+$config['rounddav_sso_enabled'] = true;
+// Which Roundcube user IDs are allowed to open the RoundDAV Provision entry in Settings > Preferences.
+// Provide an array of integers or use '*' to make it available to everyone.
+$config['rounddav_provision_settings_user_ids'] = [1];
+
+// Timeout in seconds for API requests
+$config['rounddav_api_timeout'] = 5;
+
+// Whether to verify SSL certificates when using https:// API URLs
+$config['rounddav_api_verify_ssl'] = true;
+
+
+// Optional: extra per-user calendars to create on first login.
+// Each entry supports keys:
+//   - uri         (required, string; must be unique per user and not "default")
+//   - displayname (optional, string; falls back to uri)
+//   - mode        (optional, "events", "tasks", or "both"; defaults to "both")
+//   - shared      (optional, bool; reserved for future shared/global support)
+$config['rounddav_extra_calendars'] = [
+    [
+        'uri'         => 'personal',
+        'displayname' => 'Personal',
+        'mode'        => 'events',
+        'shared'      => false,
+    ],
+    [
+        'uri'         => 'todo',
+        'displayname' => 'Tasks',
+        'mode'        => 'tasks',
+        'shared'      => false,
+    ],
+];
+
+// Optional: extra per-user addressbooks to create on first login.
+// Each entry supports keys:
+//   - uri         (required, string; must be unique per user and not "default")
+//   - displayname (optional, string; falls back to uri)
+//   - shared      (optional, bool; reserved for future shared/global support)
+$config['rounddav_extra_addressbooks'] = [
+    [
+        'uri'         => 'work',
+        'displayname' => 'Work Contacts',
+        'shared'      => false,
+    ],
+    [
+        'uri'         => 'shared',
+        'displayname' => 'Shared Contacts',
+        'shared'      => true,
+    ],
+];

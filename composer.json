@@ -1,0 +1,26 @@
+{
+  "name": "texxasrulez/rounddav_provision",
+  "description": "Roundcube plugin to auto-provision RoundDAV users on first login.",
+  "type": "roundcube-plugin",
+    "homepage": "https://github.com/texxasrulez/rounddav_provision",
+	"support": {
+		"issues": "https://github.com/texxasrulez/rounddav_provision/issues",
+		"source": "https://github.com/texxasrulez/rounddav_provision"
+  },
+  "license": "GPL-3.0",
+    "authors": [
+        {
+            "name": "Gene Hawkins",
+            "email": "texxasrulez@yahoo.com",
+            "role": "Lead"
+        }
+    ],
+  "require": {
+    "php": ">=7.4"
+  },
+  "extra": {
+    "roundcube": {
+      "min-version": "1.5"
+    }
+  }
+}

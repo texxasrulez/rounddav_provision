@@ -1,24 +1,7 @@
-# COMING SOON
-
 # rounddav_provision
-
-[![Packagist Downloads](https://img.shields.io/packagist/dt/texxasrulez/rounddav_provision?style=plastic&logo=packagist&logoColor=white&label=Downloads&labelColor=blue&color=gold)](https://packagist.org/packages/texxasrulez/rounddav_provision)
-[![Packagist Version](https://img.shields.io/packagist/v/texxasrulez/rounddav_provision?style=plastic&logo=packagist&logoColor=white&label=Version&labelColor=blue&color=limegreen)](https://packagist.org/packages/texxasrulez/rounddav_provision)
-[![Github License](https://img.shields.io/github/license/texxasrulez/rounddav_provision?style=plastic&logo=github&label=License&labelColor=blue&color=coral)](https://github.com/texxasrulez/rounddav_provision/LICENSE)
-[![GitHub Stars](https://img.shields.io/github/stars/texxasrulez/rounddav_provision?style=plastic&logo=github&label=Stars&labelColor=blue&color=deepskyblue)](https://github.com/texxasrulez/rounddav_provision/stargazers)
-[![GitHub Issues](https://img.shields.io/github/issues/texxasrulez/rounddav_provision?style=plastic&logo=github&label=Issues&labelColor=blue&color=aqua)](https://github.com/texxasrulez/rounddav_provision/issues)
-[![GitHub Contributors](https://img.shields.io/github/contributors/texxasrulez/rounddav_provision?style=plastic&logo=github&logoColor=white&label=Contributors&labelColor=blue&color=orchid)](https://github.com/texxasrulez/rounddav_provision/graphs/contributors)
-[![GitHub Forks](https://img.shields.io/github/forks/texxasrulez/rounddav_provision?style=plastic&logo=github&logoColor=white&label=Forks&labelColor=blue&color=darkorange)](https://github.com/texxasrulez/rounddav_provision/forks)
-[![Donate Paypal](https://img.shields.io/badge/Paypal-Money_Please!-blue.svg?style=plastic&labelColor=blue&color=forestgreen&logo=paypal)](https://www.paypal.me/texxasrulez)
-
-
 Automatic RoundDAV account provisioning and SSO integration for Roundcube.
 
 This plugin binds Roundcube authentication to RoundDAV users, calendars, addressbooks, and the web-based Files UI.
-
-This plugin requires [RoundDAV Server](https://github.com/texxasrulez/rounddav) to function.
-
-Check out the [Suite README](README_suite.md) to see what is entailed.
 
 ---
 
@@ -87,22 +70,23 @@ $config['rounddav_sso_enabled'] = true;
 
 ### Roundcube Preferences visibility
 
-The plugin exposes a configuration card inside **Settings → Preferences**. Control who can see and
-edit it with `rounddav_provision_settings_user_ids`:
+`rounddav_provision` exposes a full configuration page under **Settings → Preferences**. Use the
+`rounddav_provision_settings_user_ids` option to control who can see and edit that entry:
 
 ```php
-// Default: only Roundcube user ID 1 (typically the administrator)
+// Only show it to Roundcube users with ID 1 (usually the admin)
 $config['rounddav_provision_settings_user_ids'] = [1];
 
-// Allow everyone
+// ...or make it visible to all users
 $config['rounddav_provision_settings_user_ids'] = '*';
 
-// Allow a custom list
-$config['rounddav_provision_settings_user_ids'] = [1, 7, 12];
+// ...or pick any list you want
+$config['rounddav_provision_settings_user_ids'] = [1, 5, 9];
 ```
 
-The page lists the configured API endpoint, SSO state, and lets you edit every `config.inc.php`
-option without SSH access (the file is rewritten automatically on save).
+The page displays the current API/SSO settings, allows editing every option defined in
+`config.inc.php`, and acts as a quick sanity check when troubleshooting provisioning. Changes that
+you save there overwrite `config.inc.php` automatically.
 
 ### Extra per-user calendars
 
@@ -220,13 +204,3 @@ This makes it easy to debug misconfigurations without guessing.
 - It uses documented hooks.
 - It uses sessions and config like any other plugin.
 - It does one job extremely well: keep DAV users in sync with Roundcube users.
-
-Enjoy!
-
-:moneybag: **Donations** :moneybag:
-
-If you use this plugin and would like to show your appreciation by buying me a cup of coffee, I surely would appreciate it. A regular cup of Joe is sufficient, but a Starbucks Coffee would be better ... \
-Zelle (Zelle is integrated within many major banks Mobile Apps by default) - Just send to texxasrulez at yahoo dot com \
-No Zelle in your banks mobile app, no problem, just click [Paypal](https://paypal.me/texxasrulez?locale.x=en_US) and I can make a Starbucks run ...
-
-I appreciate the interest in this plugin and hope all the best ...
