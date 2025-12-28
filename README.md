@@ -1,6 +1,6 @@
 # rounddav_provision
 
-![Downloads](https://img.shields.io/github/downloads/texxasrulez/rounddav_provision/total)
+![Downloads](https://img.shields.io/github/downloads/texxasrulez/rounddav_provision/total?style=plastic&logo=github&logoColor=white&label=Downloads&labelColor=aqua&color=blue)
 [![Packagist Downloads](https://img.shields.io/packagist/dt/texxasrulez/rounddav_provision?style=plastic&logo=packagist&logoColor=white&label=Downloads&labelColor=blue&color=gold)](https://packagist.org/packages/texxasrulez/rounddav_provision)
 [![Packagist Version](https://img.shields.io/packagist/v/texxasrulez/rounddav_provision?style=plastic&logo=packagist&logoColor=white&label=Version&labelColor=blue&color=limegreen)](https://packagist.org/packages/texxasrulez/rounddav_provision)
 [![Github License](https://img.shields.io/github/license/texxasrulez/rounddav_provision?style=plastic&logo=github&label=License&labelColor=blue&color=coral)](https://github.com/texxasrulez/rounddav_provision/LICENSE)
@@ -16,6 +16,12 @@ Automatic RoundDAV account provisioning and SSO integration for Roundcube.
 This plugin binds Roundcube authentication to RoundDAV users, calendars, addressbooks, and the web-based Files UI.
 
 This plugin requires [RoundDAV Server](https://github.com/texxasrulez/rounddav) to function.
+
+Recommended Plugins:
+
+[RoundDAV Files Roundcube Plugin](https://github.com/texxasrulez/rounddav_files)
+
+[RoundDAV Bookmarks Roundcube Plugin](https://github.com/texxasrulez/rounddav_bookmarks)
 
 Check out the [Suite README](README_suite.md) to see what is entailed.
 

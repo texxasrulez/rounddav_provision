@@ -1,11 +1,26 @@
 <?php
+/**
+ * Localization stub
+ * Locale: bs_BA
+ * Language: Bosnian (Bosanski)
+ * Encoding: UTF-8
+ *
+ * This file is intentionally empty of label keys.
+ * Copy keys from en_US.inc when available and translate only the values.
+ *
+ * Guidelines:
+ *  - Keep keys IDENTICAL to en_US.inc.
+ *  - Preserve placeholders like %s, %d, and {braced} variables.
+ *  - Preserve HTML tags and entities.
+ *  - Escape single quotes in values using \' if needed.
+ */
 
 $labels = array(
     'rounddav.provision_error' => 'Error provisioning DAV account. Please contact the administrator.',
     'rounddav_provision.preferences_menu' => 'RoundDAV Provision',
     'rounddav_provision.preferences_title' => 'RoundDAV Provisioning',
     'rounddav_provision.preferences_intro' => 'This page summarizes how Roundcube provisions and links your mailbox with RoundDAV.',
-    'rounddav_provision.preferences_status_label' => 'Provisioning status: ',
+    'rounddav_provision.preferences_status_label' => 'Provisioning status',
     'rounddav_provision.status_enabled' => 'Automatic provisioning is enabled.',
     'rounddav_provision.status_disabled' => 'Provisioning is currently disabled or missing credentials.',
     'rounddav_provision.preferences_api_url' => 'Provisioning API endpoint',
