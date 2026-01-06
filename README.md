@@ -43,7 +43,7 @@ This is the hub that keeps Roundcube and RoundDAV in sync.
 **Screenshot**
 -----------
 
-![Alt text](/images/rounddav_provision.png?raw=true "RoundDAV Provisiion Screenshot")
+![Alt text](/images/rounddav-provision.png?raw=true "RoundDAV Provisiion Screenshot")
 
 ---
 
