@@ -44,7 +44,7 @@ cp config.inc.php.dist config.inc.php
 ```php
 $config['rounddav_api_url']   = 'https://your.server/rounddav/public/api.php';
 $config['rounddav_base_url']  = 'https://your.server/rounddav/public';
-$config['rounddav_sso_secret'] = 'change_me_sso'; // must match RoundDAV config
+$config['rounddav_sso_secret'] = 'change_me_sso'; // must match RoundDAV sso.secret
 $config['rounddav_sso_enabled'] = true;
 ```
 

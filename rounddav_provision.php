@@ -18,6 +18,8 @@ class rounddav_provision extends rcube_plugin
     private $config_file_path;
     private $config_is_writable = false;
     private $config_schema;
+    private $auth_user = null;
+    private $auth_pass = null;
 
     public function init()
     {
@@ -107,12 +109,11 @@ class rounddav_provision extends rcube_plugin
 
 	public function authenticate($args = [])
     {
-        // Cache credentials in PHP session so we have the cleartext password
-        // available in login_after. Use $_SESSION directly for maximum
-        // compatibility across Roundcube versions.
+        // Keep credentials in-memory for this request so we can provision
+        // in login_after without persisting cleartext secrets in session.
         if (!empty($args['user']) && !empty($args['pass'])) {
-            $_SESSION['rounddav_user'] = $args['user'];
-            $_SESSION['rounddav_pass'] = $args['pass'];
+            $this->auth_user = (string) $args['user'];
+            $this->auth_pass = (string) $args['pass'];
         }
 
         return $args;
@@ -120,28 +121,37 @@ class rounddav_provision extends rcube_plugin
 
     public function login_after($args = [])
     {
-        if (empty($this->config['api_url']) || empty($this->config['api_token'])) {
-            // Silent no-op previously; now log once per request so misconfig
-            // is visible in logs instead of silently skipping provisioning.
-            $this->debug_log('rounddav_provision: missing api_url or api_token, skipping provisioning.');
-            return $args;
-        }
+        $username = $this->auth_user;
+        $password = $this->auth_pass;
 
-        $username = isset($_SESSION['rounddav_user']) ? $_SESSION['rounddav_user'] : null;
-        $password = isset($_SESSION['rounddav_pass']) ? $_SESSION['rounddav_pass'] : null;
+        // Backward-compat fallback for older flows that may still rely on
+        // session-cached credentials.
+        if (empty($username) && isset($_SESSION['rounddav_user'])) {
+            $username = $_SESSION['rounddav_user'];
+        }
+        if (empty($password) && isset($_SESSION['rounddav_pass'])) {
+            $password = $_SESSION['rounddav_pass'];
+        }
 
         if (empty($username) || empty($password)) {
             return $args; // nothing to provision
         }
 
-        // Reset so we don't keep creds in session longer than necessary
+        // Reset so we don't keep creds around longer than necessary.
+        $this->auth_user = null;
+        $this->auth_pass = null;
         unset($_SESSION['rounddav_user'], $_SESSION['rounddav_pass']);
 
-        try {
-            $this->provision_user($username, $password);
-        } catch (Exception $e) {
-            // Log but do not block login
-            $this->debug_log('Provisioning error: ' . $e->getMessage());
+        if (empty($this->config['api_url']) || empty($this->config['api_token'])) {
+            // Keep SSO setup active even if provisioning is disabled/misconfigured.
+            $this->debug_log('rounddav_provision: missing api_url or api_token, skipping provisioning.');
+        } else {
+            try {
+                $this->provision_user($username, $password);
+            } catch (Exception $e) {
+                // Log but do not block login
+                $this->debug_log('Provisioning error: ' . $e->getMessage());
+            }
         }
 
         // After successful Roundcube login (regardless of provisioning result),
@@ -161,7 +171,12 @@ class rounddav_provision extends rcube_plugin
                 . '&ts='   . rawurlencode($ts)
                 . '&sig='  . rawurlencode($sig);
 
-            $this->debug_log('rounddav_provision: prepared SSO login URL=' . $sso_login_url);
+            $this->debug_log(
+                'rounddav_provision: prepared SSO login URL for user='
+                . $username
+                . ' base='
+                . $this->config['sso_base']
+            );
 
             $_SESSION['rounddav_sso_login_url'] = $sso_login_url;
         } else {
@@ -236,13 +251,14 @@ class rounddav_provision extends rcube_plugin
         $curl_err  = curl_error($ch);
         $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-        // Log raw response for debugging (truncate to keep log sane)
+        // Log high-level request diagnostics without raw body/tokenized URLs.
+        $responseLen = is_string($response) ? strlen($response) : 0;
         $this->debug_log(
-            "Provisioning RAW response\n" .
-            "URL: {$url}\n" .
-            "HTTP code: {$httpCode}\n" .
-            "cURL error: " . ($curl_err !== '' ? $curl_err : 'none') . "\n" .
-            "Response (first 2000 bytes):\n" . substr((string) $response, 0, 2000)
+            'Provisioning response summary: '
+            . 'host=' . (parse_url($url, PHP_URL_HOST) ?: 'n/a')
+            . ', http=' . (string) $httpCode
+            . ', curl_error=' . ($curl_err !== '' ? $curl_err : 'none')
+            . ', bytes=' . (string) $responseLen
         );
 
         if ($response === false) {
@@ -269,32 +285,6 @@ class rounddav_provision extends rcube_plugin
 
         // success, no further action needed
         $this->debug_log('Provisioning succeeded for user: ' . $username);
-
-        $username = $this->rc->get_user_name();
-        if (empty($username)) {
-            return;
-        }
-
-        $ts   = (string) time();
-        $data = $username . '|' . $ts . '|logout';
-        $sig  = hash_hmac('sha256', $data, $this->config['sso_secret']);
-
-        $sso_logout_url = $this->config['sso_base']
-            . '/sso_logout.php'
-            . '?user=' . rawurlencode($username)
-            . '&ts='   . rawurlencode($ts)
-            . '&sig='  . rawurlencode($sig);
-
-        // Use a tiny image request on the logout page so the browser hits
-        // the RoundDAV logout URL without blocking the logout flow.
-        $this->rc->output->add_script(
-            "new Image().src = " . json_encode($sso_logout_url) . ";",
-            'foot'
-        );
-
-        // Also clear any stored SSO login URL
-        unset($_SESSION['rounddav_sso_login_url']);
-
         return;
     }
 
@@ -998,7 +988,7 @@ class rounddav_provision extends rcube_plugin
         $lines[] = "// Shared secret token, must match 'shared_secret' in RoundDAV's config.php";
         $lines[] = "\$config['rounddav_api_token'] = " . $this->export_php_value($config['rounddav_api_token'] ?? '') . ";";
         $lines[] = "";
-        $lines[] = "// Shared SSO token, must match 'shared_secret' in RoundDAV's config.php";
+        $lines[] = "// Shared SSO token, must match 'sso.secret' in RoundDAV's config.php";
         $lines[] = "\$config['rounddav_sso_secret'] = " . $this->export_php_value($config['rounddav_sso_secret'] ?? '') . ";";
         $lines[] = "\$config['rounddav_sso_enabled'] = " . $this->export_php_value(!empty($config['rounddav_sso_enabled'])) . ";";
         $lines[] = "";

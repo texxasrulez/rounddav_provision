@@ -12,12 +12,12 @@ $config['rounddav_base_url']   = 'https://www.domain.com/rounddav/public';
 //   http://127.0.0.1/rounddav/public/api.php
 $config['rounddav_api_url'] = 'https://www.domain.com/rounddav/public/api.php?r=provision/user';
 
-//$config['rounddav_api_host']  = 'lamestreamnews.com';
+//$config['rounddav_api_host']  = 'domain.com';
 
 // Shared secret token, must match 'shared_secret' in RoundDAV's config.php
 $config['rounddav_api_token'] = '';
 
-// Shared SSO token, must match 'shared_secret' in RoundDAV's config.php
+// Shared SSO token, must match 'sso.secret' in RoundDAV's config.php
 $config['rounddav_sso_secret'] = '';
 $config['rounddav_sso_enabled'] = true;
 // Which Roundcube user IDs are allowed to open the RoundDAV Provision entry in Settings > Preferences.
