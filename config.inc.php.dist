@@ -2,6 +2,9 @@
 
 // RoundDAV provision plugin configuration
 
+// Enable verbose plugin logging to Roundcube's rounddav log channel.
+$config['rounddav_debug'] = false;
+
 // Base URL to RoundDAV API entrypoint (no route parameter).
 $config['rounddav_base_url']   = 'https://www.domain.com/rounddav/public';
 
@@ -26,7 +29,6 @@ $config['rounddav_api_timeout'] = 5;
 
 // Whether to verify SSL certificates when using https:// API URLs
 $config['rounddav_api_verify_ssl'] = true;
-
 
 // Optional: extra per-user calendars to create on first login.
 // Each entry supports keys:

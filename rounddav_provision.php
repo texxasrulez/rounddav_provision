@@ -63,6 +63,7 @@ class rounddav_provision extends rcube_plugin
             }
         }
         $verify_ssl = (bool) $verify_ssl_raw;
+        $debug      = (bool) $this->rc->config->get('rounddav_debug', false);
 
         // SSO-related configuration for RoundDAV web UI.
         $sso_enabled = (bool) $this->rc->config->get('rounddav_sso_enabled', false);
@@ -74,6 +75,7 @@ class rounddav_provision extends rcube_plugin
             'api_token'   => $api_token,
             'timeout'     => $timeout,
             'verify_ssl'  => $verify_ssl,
+            'debug'       => $debug,
             'sso_enabled' => $sso_enabled,
             'sso_base'    => $sso_base,
             'sso_secret'  => $sso_secret,
@@ -121,7 +123,7 @@ class rounddav_provision extends rcube_plugin
         if (empty($this->config['api_url']) || empty($this->config['api_token'])) {
             // Silent no-op previously; now log once per request so misconfig
             // is visible in logs instead of silently skipping provisioning.
-            rcube::write_log('rounddav', 'rounddav_provision: missing api_url or api_token, skipping provisioning.');
+            $this->debug_log('rounddav_provision: missing api_url or api_token, skipping provisioning.');
             return $args;
         }
 
@@ -139,14 +141,14 @@ class rounddav_provision extends rcube_plugin
             $this->provision_user($username, $password);
         } catch (Exception $e) {
             // Log but do not block login
-            rcube::write_log('rounddav', 'Provisioning error: ' . $e->getMessage());
+            $this->debug_log('Provisioning error: ' . $e->getMessage());
         }
 
         // After successful Roundcube login (regardless of provisioning result),
         // prepare a one-shot SSO login URL for the RoundDAV web UI and store it
         // in the Roundcube session. The rounddav_files plugin can then consume
         // this URL to transparently log the user into the RoundDAV Files UI.
-        rcube::write_log('rounddav', 'rounddav_provision: login_after called for user=' . $username);
+        $this->debug_log('rounddav_provision: login_after called for user=' . $username);
 
         if (!empty($this->config['sso_enabled']) && !empty($this->config['sso_base']) && !empty($this->config['sso_secret'])) {
             $ts   = (string) time();
@@ -159,11 +161,11 @@ class rounddav_provision extends rcube_plugin
                 . '&ts='   . rawurlencode($ts)
                 . '&sig='  . rawurlencode($sig);
 
-            rcube::write_log('rounddav', 'rounddav_provision: prepared SSO login URL=' . $sso_login_url);
+            $this->debug_log('rounddav_provision: prepared SSO login URL=' . $sso_login_url);
 
             $_SESSION['rounddav_sso_login_url'] = $sso_login_url;
         } else {
-            rcube::write_log('rounddav', 'rounddav_provision: SSO not enabled or misconfigured (sso_enabled='
+            $this->debug_log('rounddav_provision: SSO not enabled or misconfigured (sso_enabled='
                 . var_export($this->config['sso_enabled'], true)
                 . ', sso_base=' . var_export($this->config['sso_base'], true) . ')');
         }
@@ -235,8 +237,7 @@ class rounddav_provision extends rcube_plugin
         $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
         // Log raw response for debugging (truncate to keep log sane)
-        rcube::write_log(
-            'rounddav',
+        $this->debug_log(
             "Provisioning RAW response\n" .
             "URL: {$url}\n" .
             "HTTP code: {$httpCode}\n" .
@@ -255,25 +256,19 @@ class rounddav_provision extends rcube_plugin
         $data = json_decode($response, true);
         if ($data === null && json_last_error() !== JSON_ERROR_NONE) {
             $json_err = json_last_error_msg();
-            rcube::write_log(
-                'rounddav',
-                'Provisioning JSON decode error: ' . $json_err
-            );
+            $this->debug_log('Provisioning JSON decode error: ' . $json_err);
             throw new RuntimeException('Invalid JSON response from RoundDAV API: ' . $json_err);
         }
 
         // Check API-level result
         if ($httpCode !== 200 || empty($data['status']) || $data['status'] !== 'ok') {
             $msg = isset($data['message']) ? $data['message'] : 'Unknown error';
-            rcube::write_log(
-                'rounddav',
-                'Provisioning failed (HTTP ' . $httpCode . '): ' . $msg
-            );
+            $this->debug_log('Provisioning failed (HTTP ' . $httpCode . '): ' . $msg);
             throw new RuntimeException('Provisioning failed (HTTP ' . $httpCode . '): ' . $msg);
         }
 
         // success, no further action needed
-        rcube::write_log('rounddav', 'Provisioning succeeded for user: ' . $username);
+        $this->debug_log('Provisioning succeeded for user: ' . $username);
 
         $username = $this->rc->get_user_name();
         if (empty($username)) {
@@ -976,6 +971,15 @@ class rounddav_provision extends rcube_plugin
         return true;
     }
 
+    private function debug_log($message)
+    {
+        if (empty($this->config['debug'])) {
+            return;
+        }
+
+        rcube::write_log('rounddav', (string) $message);
+    }
+
     private function build_config_file(array $config)
     {
         $lines = [];
@@ -1006,6 +1010,9 @@ class rounddav_provision extends rcube_plugin
         $lines[] = "";
         $lines[] = "// Whether to verify SSL certificates when using https:// API URLs";
         $lines[] = "\$config['rounddav_api_verify_ssl'] = " . $this->export_php_value(!empty($config['rounddav_api_verify_ssl'])) . ";";
+        $lines[] = "";
+        $lines[] = "// Enable verbose plugin logging to Roundcube's rounddav log channel.";
+        $lines[] = "\$config['rounddav_debug'] = " . $this->export_php_value(!empty($config['rounddav_debug'])) . ";";
         $lines[] = "";
         $lines[] = "// Optional: extra per-user calendars to create on first login.";
         $lines[] = "\$config['rounddav_extra_calendars'] = " . $this->export_php_value($config['rounddav_extra_calendars'] ?? []) . ";";
